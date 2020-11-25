@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use MoovOne\TimekitPhpSdk\Exception\BadRequestException;
 use MoovOne\TimekitPhpSdk\Model\Booking;
+use MoovOne\TimekitPhpSdk\Model\ActionLink;
 
 /**
  * Class GuzzleClient
@@ -19,6 +20,7 @@ class GuzzleClient implements ClientInterface
      * @var Client
      */
     private $httpClient;
+    private $apiKey;
 
     /**
      * @var array
@@ -39,6 +41,8 @@ class GuzzleClient implements ClientInterface
             'Content-Type' => 'application/json',
             'Authorization' => 'Basic '.base64_encode(':'.$apiKey),
         ];
+
+        $this->apiKey = $apiKey;
     }
 
     /**
@@ -191,5 +195,65 @@ class GuzzleClient implements ClientInterface
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    public function getProject(string $project_id): array
+    {
+        try {
+            $response = $this->httpClient->get(sprintf('%s/%s', ClientInterface::ENDPOINT_PROJECT, $project_id), [
+                'headers' => $this->headers,
+                RequestOptions::JSON => [],
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            return $data;
+        } catch (\Throwable $e) {
+            throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getProjects(string $search = ''): array
+    {
+        if($search) {
+            $search = '?search=' . $search;
+        }
+
+        try {
+            $response = $this->httpClient->get(ClientInterface::ENDPOINT_PROJECT . $search, [
+                'headers' => $this->headers,
+                //RequestOptions::JSON => $payload,
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            return $data;
+        } catch (\Throwable $e) {
+            throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    public function getProjectResources(string $project_id): array
+    {
+        try {
+            $response = $this->httpClient->get(sprintf('%s/%s/%s', ClientInterface::ENDPOINT_PROJECT, $project_id, 'resources'), [
+                'headers' => $this->headers
+            ]);
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            return $data;
+        } catch (\Throwable $e) {
+            throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+
+    public function generateActionLink(string $booking_id, string $action, string $redirect_url)
+    {
+        return ActionLink::generateActionLink($this->apiKey, $booking_id, $action, $redirect_url);
     }
 }
