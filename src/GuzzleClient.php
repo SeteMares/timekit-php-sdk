@@ -39,7 +39,7 @@ class GuzzleClient implements ClientInterface
 
         $this->headers = [
             'Content-Type' => 'application/json',
-            'Authorization' => 'Basic '.base64_encode(':'.$apiKey),
+            'Authorization' => 'Basic ' . base64_encode(':' . $apiKey),
         ];
 
         $this->apiKey = $apiKey;
@@ -62,14 +62,18 @@ class GuzzleClient implements ClientInterface
     public function createResource(array $payload): array
     {
         try {
-            $response = $this->httpClient->request('POST', ClientInterface::ENDPOINT_RESOURCE, [
-                'headers' => $this->headers,
-                RequestOptions::JSON => $payload,
-            ]);
+            $response = $this->httpClient->request(
+                'POST',
+                ClientInterface::ENDPOINT_RESOURCE,
+                [
+                    'headers' => $this->headers,
+                    RequestOptions::JSON => $payload,
+                ]
+            );
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            return $data;
+            return $data['data'] ?? $data;
         } catch (GuzzleException $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
@@ -81,10 +85,13 @@ class GuzzleClient implements ClientInterface
     public function updateResource(string $resourceId, array $payload): void
     {
         try {
-            $this->httpClient->put(sprintf('%s/%s', ClientInterface::ENDPOINT_RESOURCE, $resourceId), [
-                'headers' => $this->headers,
-                RequestOptions::JSON => $payload,
-            ]);
+            $this->httpClient->put(
+                sprintf('%s/%s', ClientInterface::ENDPOINT_RESOURCE, $resourceId),
+                [
+                    'headers' => $this->headers,
+                    RequestOptions::JSON => $payload,
+                ]
+            );
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
@@ -96,9 +103,12 @@ class GuzzleClient implements ClientInterface
     public function deleteResource(string $resourceId): void
     {
         try {
-            $this->httpClient->delete(sprintf('%s/%s', ClientInterface::ENDPOINT_RESOURCE, $resourceId), [
-                'headers' => $this->headers,
-            ]);
+            $this->httpClient->delete(
+                sprintf('%s/%s', ClientInterface::ENDPOINT_RESOURCE, $resourceId),
+                [
+                    'headers' => $this->headers,
+                ]
+            );
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
@@ -110,13 +120,21 @@ class GuzzleClient implements ClientInterface
     public function getResource(string $resourceId): array
     {
         try {
-            $response = $this->httpClient->request('GET', sprintf('%s/%s?include=availability_constraints', ClientInterface::ENDPOINT_RESOURCE, $resourceId), [
-                'headers' => $this->headers,
-            ]);
+            $response = $this->httpClient->request(
+                'GET',
+                sprintf(
+                    '%s/%s?include=availability_constraints',
+                    ClientInterface::ENDPOINT_RESOURCE,
+                    $resourceId
+                ),
+                [
+                    'headers' => $this->headers,
+                ]
+            );
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            return $data;
+            return $data['data'] ?? $data;
         } catch (GuzzleException $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
@@ -135,7 +153,7 @@ class GuzzleClient implements ClientInterface
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            return $data;
+            return $data['data'] ?? $data;
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
@@ -154,7 +172,7 @@ class GuzzleClient implements ClientInterface
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            return $data;
+            return $data['data'] ?? $data;
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
@@ -166,9 +184,12 @@ class GuzzleClient implements ClientInterface
     public function deleteBooking(string $bookingId): void
     {
         try {
-            $this->httpClient->delete(sprintf('%s/%s', ClientInterface::ENDPOINT_BOOKING, $bookingId), [
-                'headers' => $this->headers,
-            ]);
+            $this->httpClient->delete(
+                sprintf('%s/%s', ClientInterface::ENDPOINT_BOOKING, $bookingId),
+                [
+                    'headers' => $this->headers,
+                ]
+            );
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
@@ -181,33 +202,82 @@ class GuzzleClient implements ClientInterface
     {
         try {
             if (false === in_array($state, Booking::AVAILABLE_STATES)) {
-                throw new \InvalidArgumentException('Bad value for $state parameter. Allowed values are: '.implode(', ', Booking::AVAILABLE_STATES));
+                throw new \InvalidArgumentException(
+                    'Bad value for $state parameter. Allowed values are: ' .
+                        implode(', ', Booking::AVAILABLE_STATES)
+                );
             }
 
-            $response = $this->httpClient->put(sprintf('%s/%s/%s', ClientInterface::ENDPOINT_BOOKING, $bookingId, $state), [
-                'headers' => $this->headers,
-                RequestOptions::JSON => [],
-            ]);
+            $response = $this->httpClient->put(
+                sprintf('%s/%s/%s', ClientInterface::ENDPOINT_BOOKING, $bookingId, $state),
+                [
+                    'headers' => $this->headers,
+                    RequestOptions::JSON => [],
+                ]
+            );
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            return $data;
+            return $data['data'] ?? $data;
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
-    public function getProject(string $project_id): array
+    /**
+     * @inheritdoc
+     */
+    public function createProject(array $payload): array
     {
         try {
-            $response = $this->httpClient->get(sprintf('%s/%s', ClientInterface::ENDPOINT_PROJECT, $project_id), [
+            $response = $this->httpClient->post(ClientInterface::ENDPOINT_PROJECT, [
                 'headers' => $this->headers,
-                RequestOptions::JSON => [],
+                RequestOptions::JSON => $payload,
             ]);
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            return $data;
+            return $data['data'] ?? $data;
+        } catch (\Throwable $e) {
+            throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function updateProject(string $projectId, array $payload): void
+    {
+        try {
+            $this->httpClient->put(
+                sprintf('%s/%s', ClientInterface::ENDPOINT_PROJECT, $projectId),
+                [
+                    'headers' => $this->headers,
+                    RequestOptions::JSON => $payload,
+                ]
+            );
+        } catch (\Throwable $e) {
+            throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getProject(string $project_id): array
+    {
+        try {
+            $response = $this->httpClient->get(
+                sprintf('%s/%s', ClientInterface::ENDPOINT_PROJECT, $project_id),
+                [
+                    'headers' => $this->headers,
+                    RequestOptions::JSON => [],
+                ]
+            );
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            return $data['data'] ?? $data;
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
@@ -218,7 +288,7 @@ class GuzzleClient implements ClientInterface
      */
     public function getProjects(string $search = ''): array
     {
-        if($search) {
+        if ($search) {
             $search = '?search=' . $search;
         }
 
@@ -230,30 +300,51 @@ class GuzzleClient implements ClientInterface
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            return $data;
+            return $data['data'] ?? $data;
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getProjectResources(string $project_id): array
     {
         try {
-            $response = $this->httpClient->get(sprintf('%s/%s/%s', ClientInterface::ENDPOINT_PROJECT, $project_id, 'resources'), [
-                'headers' => $this->headers
-            ]);
+            $response = $this->httpClient->get(
+                sprintf(
+                    '%s/%s/%s',
+                    ClientInterface::ENDPOINT_PROJECT,
+                    $project_id,
+                    'resources'
+                ),
+                [
+                    'headers' => $this->headers,
+                ]
+            );
 
             $data = json_decode($response->getBody()->getContents(), true);
 
-            return $data;
+            return $data['data'] ?? $data;
         } catch (\Throwable $e) {
             throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
-
-    public function generateActionLink(string $booking_id, string $action, string $redirect_url)
-    {
-        return ActionLink::generateActionLink($this->apiKey, $booking_id, $action, $redirect_url);
+    /**
+     * @inheritdoc
+     */
+    public function generateActionLink(
+        string $booking_id,
+        string $action,
+        string $redirect_url
+    ) {
+        return ActionLink::generateActionLink(
+            $this->apiKey,
+            $booking_id,
+            $action,
+            $redirect_url
+        );
     }
 }
