@@ -1,27 +1,35 @@
 {
-  "name": "moovone/timekit-php-sdk",
-  "description": "A basic PHP SDK for timekit.io API",
-  "type": "library",
-  "keywords": ["moovone", "php", "sdk", "timekit", "api"],
-  "homepage": "http://github.com/MoovOne/timekit-php-sdk",
-  "license": "GPL-3.0-or-later",
-  "authors": [
-    {
-      "name": "David Micheau",
-      "email": "fanel.dev@gmail.com"
+    "name": "moovone/timekit-php-sdk",
+    "description": "A basic PHP SDK for timekit.io API",
+    "type": "library",
+    "keywords": [
+        "moovone",
+        "php",
+        "sdk",
+        "timekit",
+        "api"
+    ],
+    "homepage": "http://github.com/MoovOne/timekit-php-sdk",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "David Micheau",
+            "email": "fanel.dev@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.1",
+        "guzzlehttp/guzzle": "^6.3",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "MoovOne\\TimekitPhpSdk\\": "src/"
+        }
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^4.2",
+        "phpunit/phpunit": "^8"
     }
-  ],
-  "minimum-stability": "stable",
-  "require": {
-    "php": "^7.1",
-    "guzzlehttp/guzzle": "^6.3",
-    "ext-json": "*"
-  },
-  "autoload": {
-    "psr-4": {"MoovOne\\TimekitPhpSdk\\": "src/"}
-  },
-  "require-dev": {
-    "symfony/var-dumper": "^4.2",
-    "phpunit/phpunit": "^8"
-  }
 }
