@@ -264,6 +264,23 @@ class GuzzleClient implements ClientInterface
     /**
      * @inheritdoc
      */
+    public function deleteProject(string $projectId): void
+    {
+        try {
+            $this->httpClient->delete(
+                sprintf('%s/%s', ClientInterface::ENDPOINT_PROJECT, $projectId),
+                [
+                    'headers' => $this->headers,
+                ]
+            );
+        } catch (\Throwable $e) {
+            throw new BadRequestException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getProject(string $project_id): array
     {
         try {
